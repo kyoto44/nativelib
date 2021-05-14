@@ -1,0 +1,64 @@
+name: build
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+  release:
+    types:
+      - released
+
+jobs:
+
+  test:
+    strategy:
+      matrix:
+        os:
+          - ubuntu-latest
+          - windows-latest
+        node:
+          - 14
+    name: Testing Node ${{ matrix.node }} on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node }}
+      - run: npm install --ignore-scripts
+      - run: npm run build-debug
+
+  publish:
+    if: ${{ github.event_name == 'release' }}
+    name: Publishing to NPM
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: 14
+          registry-url: https://registry.npmjs.org
+      - run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+  prebuild:
+    strategy:
+      matrix:
+        os:
+          - ubuntu-latest
+          - windows-latest
+    name: Prebuild on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    needs: publish
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: 14
+      - run: npm install --ignore-scripts
+      - run: npx --no-install prebuild -r node 14.0.0 --include-regex 'nativelib.node$' -u ${{ secrets.GITHUB_TOKEN }}
+      - run: npx --no-install prebuild -r electron -t 11.0.0 -t 12.0.0 --include-regex 'nativelib.node$' -u ${{ secrets.GITHUB_TOKEN }}

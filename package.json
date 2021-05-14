@@ -1,12 +1,12 @@
 {
-	"name": "@kaciras-blog/nativelib",
+	"name": "xxhash3lib",
 	"version": "0.2.4",
-	"description": "Node.js native addon for kaciras blog",
+	"description": "Fork of Node.js native addon for kaciras blog",
 	"license": "MIT",
 	"author": "Kaciras <Kaciras@protonmail.com>",
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/kaciras-blog/nativelib"
+		"url": "https://github.com/kyoto44/nativelib"
 	},
 	"main": "index.js",
 	"types": "index.d.ts",
@@ -20,7 +20,9 @@
 	"scripts": {
 		"install": "node script/prebuild.js install || node-gyp rebuild --ensure",
 		"lint": "eslint --fix --ext .js .",
-		"test": "jest"
+		"test": "jest",
+		"build-release": "node-gyp rebuild --release",
+		"build-debug": "node-gyp rebuild --debug"
 	},
 	"dependencies": {
 		"follow-redirects": "^1.13.0",
